@@ -35,3 +35,4 @@ jobs:
         run: |
           Xvfb :99 -screen 0 1024x768x24 &
           python main.py  # Run your Selenium script
+
