@@ -29,18 +29,14 @@ jobs:
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt install ./google-chrome-stable_current_amd64.deb
 
-      - name: Download ChromeDriver
+      - name: Install Chrome Driver via apt
         run: |
-          CHROMEDRIVER_VERSION="133.0.0.0
-          wget "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}" -O chromedriver_version
-          CHROMEDRIVER_VERSION=$(cat chromedriver_version)
-          wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
-          unzip chromedriver_linux64.zip
-          sudo mv chromedriver /usr/local/bin/
+          sudo apt-get update
+          sudo apt-get install -y chromium-chromedriver
 
       - name: Run Selenium tests
         env:
-          DISPLAY: :99.0  # Xvfb requires a display number
+          DISPLAY: :99.0
         run: |
           Xvfb :99 -screen 0 1024x768x24 &
-          python your_selenium_script.py  # 运行你的 Selenium 脚本
+          python main.py
