@@ -1,0 +1,46 @@
+name: Selenium Tests
+
+on:
+  push:
+    branches: [ main ]  # 可根据你的需要修改触发分支
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  selenium-tests:
+    runs-on: ubuntu-latest  # 选择运行环境
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt  # 安装项目依赖，包括 Selenium
+
+      - name: Install Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install ./google-chrome-stable_current_amd64.deb
+
+      - name: Download ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome //g' | cut -d '.' -f 1)
+          wget "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}" -O chromedriver_version
+          CHROMEDRIVER_VERSION=$(cat chromedriver_version)
+          wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+
+      - name: Run Selenium tests
+        env:
+          DISPLAY: :99.0  # Xvfb requires a display number
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 &
+          python your_selenium_script.py  # 运行你的 Selenium 脚本
