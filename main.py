@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import openpyxl
+import time
 
 def clickXPATH(xpath):
     button = driver.find_element(By.XPATH,xpath)
@@ -34,6 +35,7 @@ data = openpyxl.Workbook()
 
 sheet = data["Sheet"]
 
+nowTime=time.strftime('%Y-%m-%d')
 #filepath="temp "+generate_code(5)+" .xlsx"
 filepath3="浙江政府采购网 "+nowTime+"生成 .xlsx"
 data.save(filepath3)
