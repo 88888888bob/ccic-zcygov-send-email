@@ -8,6 +8,11 @@ from selenium.webdriver.support import expected_conditions as EC
 
 import openpyxl
 import time
+import yagmail
+
+def send_mail(sender, to, subject, contents):
+    smtp = yagmail.SMTP(user=sender, host='smtp.qq.com')
+    smtp.send(to, subject=subject, contents=contents)
 
 def clickXPATH(xpath):
     button = driver.find_element(By.XPATH,xpath)
@@ -22,14 +27,9 @@ def clearTextXPATH(xpath):
     text_label.clear()
 
 
-send=False
+send=True
 
-mails=[]
-with open("mail.txt","r+") as file:
-   mail=file.read().split("\n")
-for m in mail:
-    if m!="":
-        mails.append(m)
+
 
 data = openpyxl.Workbook()
 
@@ -95,6 +95,7 @@ try:
     #要爬取的页数
 
     for i in range(getPages):
+        print(f"geting data:{i}")
         page=driver.find_elements(By.XPATH, '/html/body/div[1]/div/div[4]/div/div[2]/div[2]/div[2]/div/div[1]/ul/li')
         for li in page:
             link=li.find_element(By.XPATH, 'a')
@@ -104,6 +105,7 @@ try:
 
             title=link.text
             url=link.get_attribute('href')
+            print(f"finded url:{url}")
             day=day.text
             position=position.text.replace("\n","")
 
@@ -137,3 +139,38 @@ except Exception as e:
 finally:
     driver.quit()
     print("Browser closed.")
+
+if send:
+    password=os.environ.get("EMAILPASSWORD")
+    
+    mails=[]
+    with open("mail.txt","r+") as file:
+       mail=file.read().split("\n")
+    for m in mail:
+        if m!="":
+            mails.append(m)
+    if len(sendDatas)==0:
+        print(time.strftime('%Y-%m-%d %H:%M:%S'),"without information")
+    elif password==None or password=="":
+        print(time.strftime('%Y-%m-%d %H:%M:%S'),"please enter the password")
+    else:
+        yagmail.register('930914114@qq.com', password)
+        print(time.strftime('%Y-%m-%d %H:%M:%S'),"start create email files")
+        sendlist=[nowTime+"生成<br/>本邮件由程序自动生成<br/>"]
+        for sendData in sendDatas:
+            sendlist.append(sendData[0])
+            sendlist.append(sendData[1])
+            sendlist.append(sendData[2])
+            sendlist.append('<a href="%s">%s</a>'%(sendData[3],sendData[3]))
+            sendlist.append("<br/>")
+            #print(sendData[0],sendData[1],sendData[3],end="\n\n\n")
+        sendlist.append("<br/>")
+        sendlist.append(filepath1)
+        sendlist.append(filepath2)
+                
+        send_mail("930914114@qq.com", mails, f"浙江政府采购网 {nowTime}生成", sendlist)
+            
+        print(time.strftime('%Y-%m-%d %H:%M:%S'),"successful send email:",mails)
+
+print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),"done")
+
